@@ -15,7 +15,7 @@ namespace GestionProductosNet10.Controllers
             _context = context;
         }
 
-        // CONSULTAR: Mostrar todos los productos
+        // CONSULTAR PRODUCTOS
         public async Task<IActionResult> Index()
         {
             var productos = await _context.Productos
@@ -52,7 +52,7 @@ namespace GestionProductosNet10.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // EDITAR: Mostrar formulario con los datos actuales
+        // EDITAR: Mostrar formulario
         [HttpGet]
         public async Task<IActionResult> Editar(int id)
         {
@@ -66,7 +66,7 @@ namespace GestionProductosNet10.Controllers
             return View(producto);
         }
 
-        // EDITAR: Guardar los cambios realizados
+        // EDITAR: Guardar modificaciones
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Editar(
@@ -98,6 +98,43 @@ namespace GestionProductosNet10.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Mensaje"] = "Producto actualizado correctamente.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ELIMINAR: Mostrar pantalla de confirmación
+        [HttpGet]
+        public async Task<IActionResult> Eliminar(int id)
+        {
+            var producto = await _context.Productos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.IdProducto == id);
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            return View(producto);
+        }
+
+        // ELIMINAR: Confirmar eliminación
+        [HttpPost]
+        [ActionName("Eliminar")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EliminarConfirmado(int id)
+        {
+            var producto = await _context.Productos.FindAsync(id);
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            _context.Productos.Remove(producto);
+            await _context.SaveChangesAsync();
+
+            TempData["Mensaje"] = "Producto eliminado correctamente.";
 
             return RedirectToAction(nameof(Index));
         }
